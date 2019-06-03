@@ -1,0 +1,17 @@
+OPENSSL = '/usr/bin/openssl'
+
+CA_ROOT = r'/etc/pki/CA'
+CA_CERT_FILE = 'cacert.pem'
+CA_KEY_FILE = 'private/cakey.pem'
+CA_CSR_ROOT = CA_ROOT + '/csr'
+CA_CERT_ROOT = CA_ROOT + '/certs'
+CRL_FILE = "crl/ca_crl.pem"
+
+CONN_PARAMS = {
+    "host": "127.0.0.1",
+    "port": 3306,
+    "user": "root",
+    "passwd": "root",
+    "db": "database",
+}
+VERIFY_TABLE = "table_name"
