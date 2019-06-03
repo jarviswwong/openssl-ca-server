@@ -31,7 +31,6 @@ class GetCACrlHandler(web.RequestHandler):
             self.set_status(404)
             return
 
-        # self.set_header("Content-Type", "application/pkix-crl")
         # 设置为pem格式的CRL
         self.set_header("Content-Type", "application/x-pem-file")
         self.set_header('Content-Disposition',
@@ -79,3 +78,7 @@ class GencertHandler(web.RequestHandler):
         ret = gencert(365, action['csr_name'], action['csr_body'])
         self.write(json.dumps(ret))
         self.finish()
+
+class CertRevokeHandler(web.RequestHandler):
+    def delete(self):
+        pass

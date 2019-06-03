@@ -1,15 +1,16 @@
 import json
 from tornado.web import Application, RequestHandler
 from tornado.ioloop import IOLoop
-from handler import GetCACertHandler, GetCACrlHandler, GencertHandler
+from handler import GetCACertHandler, GetCACrlHandler, GencertHandler, CertRevokeHandler
+
+routers = [(r'/api/ca/cacert', GetCACertHandler),
+           (r'/api/ca/crl', GetCACrlHandler), (r'/api/ca/sign',
+                                               GencertHandler),
+           (r'/api/ca/revoke', CertRevokeHandler)]
 
 
-# router
 def make_tornado_server():
-    urls = [(r'/api/ca/cacert', GetCACertHandler),
-            (r'/api/ca/crl', GetCACrlHandler), (r'/api/ca/sign',
-                                                GencertHandler)]
-    return Application(urls, debug=True)
+    return Application(routers, debug=True)
 
 
 if __name__ == '__main__':
