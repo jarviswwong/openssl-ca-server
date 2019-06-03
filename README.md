@@ -83,7 +83,7 @@ Connection: close
 
 #### Parameters
 
-* csr_name: request文件名(可能会删除)
+* csr_name: request文件名(可选参数，默认将CommonName作为文件名)
 * csr_body: **base64**编码后的request data
 * f: fingerprint，用于校验是否为私有网络中的节点
 
@@ -125,5 +125,7 @@ Connection: close
 `DELET      /api/ca/revoke`
 
 #### Parameters
+
+* 
 
 #### Response 200:

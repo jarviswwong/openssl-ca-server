@@ -50,8 +50,7 @@ class GencertHandler(web.RequestHandler):
     def post(self):
         action = json.loads(self.request.body)
         # check arguments existing
-        if 'csr_name' not in action.keys() or 'csr_body' not in action.keys(
-        ) or 'f' not in action.keys():
+        if 'csr_body' not in action.keys() or 'f' not in action.keys():
             self.write({
                 "status": -1,
                 "msg": "[Request error]: missing parameters!"
@@ -59,10 +58,12 @@ class GencertHandler(web.RequestHandler):
             return
 
         action['csr_body'] = base64.b64decode(action['csr_body'])
-        req = load_certificate_request(FILETYPE_PEM, action['csr_body'])
-        subject = req.get_subject()
-        components = dict(subject.get_components())
-        # print(components)
+        # 如果没有传入csr_name参数，则将req中的CommonName作为文件名
+        if 'csr_name' not in action.keys():
+            req = load_certificate_request(FILETYPE_PEM, action['csr_body'])
+            subject = req.get_subject()
+            components = dict(subject.get_components())
+            action['csr_name'] = components[b'CN'].decode('utf8')
 
         # 从数据库中检查fingerprint
         result = yield self.mysql_pool.execute(
@@ -74,10 +75,12 @@ class GencertHandler(web.RequestHandler):
                 "msg": "[Request error:] verification error!"
             })
             return
+
         # 调用生成证书函数
         ret = gencert(365, action['csr_name'], action['csr_body'])
         self.write(json.dumps(ret))
         self.finish()
+
 
 class CertRevokeHandler(web.RequestHandler):
     def delete(self):
