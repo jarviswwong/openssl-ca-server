@@ -2,7 +2,7 @@
 
 用于私有网络中自建CA中心并进行证书的签发和认证
 
-
+[TOC]
 
 ------
 
@@ -17,7 +17,7 @@
 
 
 
-### 获取CA证书
+### 获取CA根证书
 
 #### URL
 
@@ -96,13 +96,13 @@ Connection: close
 ```json
 {
   status: -1,
-  msg: "ERROR Messages"
+  msg: "ERROR Message"
 }
 ```
-
+message的具体信息如下表：
 | status | message                                                      | Remarks                  |
-| ------ | ------------------------------------------------------------ | ------------------------ |
-| -1     | [Request error]: Missing parameters!                         | 参数缺失                 |
+| :----: | ------------------------------------------------------------ | ------------------------ |
+|   -1   | [Request error]: Missing parameters!                         | 必要参数缺失             |
 |        | [Request error]: Verification error!                         | fingerprint校验失败      |
 |        | [ERROR]:Something is error with signing processing!          | 签发证书超时 \| 签发失败 |
 |        | [ERROR]:Please do not repeat the application for certificate! | 重复签发                 |
@@ -128,9 +128,42 @@ Connection: close
 
 有两种模式：通过序列号（证书丢失）和证书来进行吊销操作
 
-* serial: 需要吊销的证书序列号(与cert二选一)
+* serial: 需要吊销的证书序列号(与cert二选一)，需为**16进制**格式
 * cert: 需要吊销的证书(与serial二选一)
-* f: fingerprint, 用于校验
+* f: fingerprint，同上，用于校验
 
 #### Response 200:
+
+状态码一律返回200
+
+**吊销失败**将返回:
+
+```json
+{
+  status: -1,
+  msg: '[ERROR Message]'
+}
+```
+
+其中error message具体信息如下表：
+| status | message                                       | Remarks             |
+| :----: | --------------------------------------------- | ------------------- |
+|   -1   | [Request error]: Missing parameters!          | 必要参数缺失        |
+|        | [Request error:] Verification error!          | fingerprint校验失败 |
+|        | [ERROR]:Wrong certificate format!             | 证书格式不正确      |
+|        | [ERROR]:This may be an invalid serial number! | 证书序列号无效      |
+|        | [ERROR]:This certificate is revoked!          | 该证书已经被吊销    |
+|        | [ERROR]:Revoke failed, unknown error!         | 吊销失败，未知错误  |
+
+**吊销成功**则返回：
+
+其中`Serial Number`为已吊销证书的序列号，以16进制表示
+
+```json
+{
+  "status": 0,
+  "msg": "Revoke Certificate success!",
+  "Serial Number": "3166306230653066383662636431643b"
+}
+```
 
