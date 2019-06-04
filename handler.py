@@ -4,6 +4,8 @@ from OpenSSL.crypto import load_certificate_request, FILETYPE_PEM
 from tornado_mysql import pools
 from config import *
 from gencert import gencert
+from revoke import revokeFromCert, revokeFromSerial
+from common import checkFingerprint, jsonMessage
 
 
 class GetCACertHandler(web.RequestHandler):
@@ -42,9 +44,6 @@ class GetCACrlHandler(web.RequestHandler):
 
 
 class GencertHandler(web.RequestHandler):
-    mysql_pool = pools.Pool(
-        CONN_PARAMS, max_idle_connections=1, max_recycle_sec=3)
-
     # gen.coroutine表示异步模式
     @gen.coroutine
     def post(self):
@@ -53,7 +52,16 @@ class GencertHandler(web.RequestHandler):
         if 'csr_body' not in action.keys() or 'f' not in action.keys():
             self.write({
                 "status": -1,
-                "msg": "[Request error]: missing parameters!"
+                "msg": "[Request error]: Missing parameters!"
+            })
+            return
+
+        # 从数据库中检查fingerprint
+        result = checkFingerprint(action['f'])
+        if not result:
+            self.write({
+                "status": -1,
+                "msg": "[Request error:] Verification error!"
             })
             return
 
@@ -65,17 +73,6 @@ class GencertHandler(web.RequestHandler):
             components = dict(subject.get_components())
             action['csr_name'] = components[b'CN'].decode('utf8')
 
-        # 从数据库中检查fingerprint
-        result = yield self.mysql_pool.execute(
-            'select * from ' + VERIFY_TABLE + ' where fingerprint = %s',
-            (action['f']))
-        if result.rowcount == 0:
-            self.write({
-                "status": -1,
-                "msg": "[Request error:] verification error!"
-            })
-            return
-
         # 调用生成证书函数
         ret = gencert(365, action['csr_name'], action['csr_body'])
         self.write(json.dumps(ret))
@@ -83,5 +80,21 @@ class GencertHandler(web.RequestHandler):
 
 
 class CertRevokeHandler(web.RequestHandler):
+    @gen.coroutine
     def delete(self):
-        pass
+        action = json.loads(self.request.body)
+        if 'f' not in action or not checkFingerprint(action['f']):
+            self.write({
+                "status": -1,
+                "msg": "[Request error:] Verification error!"
+            })
+            return
+
+        if 'cert' in action.keys():
+            result = revokeFromCert(action['cert'])
+        elif 'serial' in action.keys():
+            result = revokeFromSerial(action['serial'])
+        else:
+            result = jsonMessage(-1, "[Request error]: Missing parameters!")
+        self.write(result)
+        self.finish()

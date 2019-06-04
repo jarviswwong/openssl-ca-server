@@ -83,9 +83,9 @@ Connection: close
 
 #### Parameters
 
-* csr_name: request文件名(可选参数，默认将CommonName作为文件名)
 * csr_body: **base64**编码后的request data
 * f: fingerprint，用于校验是否为私有网络中的节点
+* csr_name（可选）: request文件名，不提供则默认将CommonName作为文件名
 
 #### Response 200:
 
@@ -102,8 +102,8 @@ Connection: close
 
 | status | message                                                      | Remarks                  |
 | ------ | ------------------------------------------------------------ | ------------------------ |
-| -1     | [Request error]: missing parameters!                         | 参数缺失                 |
-|        | [Request error:] verification error!                         | fingerprint校验失败      |
+| -1     | [Request error]: Missing parameters!                         | 参数缺失                 |
+|        | [Request error]: Verification error!                         | fingerprint校验失败      |
 |        | [ERROR]:Something is error with signing processing!          | 签发证书超时 \| 签发失败 |
 |        | [ERROR]:Please do not repeat the application for certificate! | 重复签发                 |
 
@@ -122,10 +122,15 @@ Connection: close
 
 #### URL
 
-`DELET      /api/ca/revoke`
+`DELETE      /api/ca/revoke`
 
 #### Parameters
 
-* 
+有两种模式：通过序列号（证书丢失）和证书来进行吊销操作
+
+* serial: 需要吊销的证书序列号(与cert二选一)
+* cert: 需要吊销的证书(与serial二选一)
+* f: fingerprint, 用于校验
 
 #### Response 200:
+

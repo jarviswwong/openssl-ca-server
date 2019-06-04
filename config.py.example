@@ -5,6 +5,7 @@ CA_CERT_FILE = 'cacert.pem'
 CA_KEY_FILE = 'private/cakey.pem'
 CA_CSR_ROOT = CA_ROOT + '/csr'
 CA_CERT_ROOT = CA_ROOT + '/certs'
+CA_NEWCERTS = CA_ROOT + '/newcerts'
 CRL_FILE = "crl/ca_crl.pem"
 
 CONN_PARAMS = {
