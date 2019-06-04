@@ -28,7 +28,7 @@
 | GET    | /api/ca/cacert | 获取CA中心的根证书 | ✔️      |
 | GET    | /api/ca/crl    | 获取CA中心的CRL    | ✔️      |
 | POST   | /api/ca/sign   | 签发证书           | ✔️      |
-| DELETE | /api/ca/revoke | 吊销证书           |        |
+| DELETE | /api/ca/revoke | 吊销证书           | ✔️      |
 
 
 
