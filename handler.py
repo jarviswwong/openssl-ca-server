@@ -1,4 +1,5 @@
 import json, os, base64
+import OpenSSL.crypto
 from tornado import web, gen
 from OpenSSL.crypto import load_certificate_request, FILETYPE_PEM
 from tornado_mysql import pools
@@ -56,16 +57,24 @@ class GencertHandler(web.RequestHandler):
         # 从数据库中检查fingerprint
         result = checkFingerprint(action['f'])
         if not result:
-            self.write(jsonMessage(-1, "[Request error:] Verification error!"))
+            self.write(jsonMessage(-1, "[Request error]: Verification error!"))
             return
 
-        action['csr_body'] = base64.b64decode(action['csr_body'])
-        # 如果没有传入csr_name参数，则将req中的CommonName作为文件名
-        if 'csr_name' not in action.keys():
-            req = load_certificate_request(FILETYPE_PEM, action['csr_body'])
-            subject = req.get_subject()
-            components = dict(subject.get_components())
-            action['csr_name'] = components[b'CN'].decode('utf8')
+        try:
+            action['csr_body'] = base64.b64decode(action['csr_body'])
+            # 如果没有传入csr_name参数，
+            # 则将req中的CommonName作为文件名
+            if 'csr_name' not in action.keys():
+                req = load_certificate_request(FILETYPE_PEM, action['csr_body'])
+                subject = req.get_subject()
+                components = dict(subject.get_components())
+                action['csr_name'] = components[b'CN'].decode('utf8')
+        except base64.binascii.Error:
+            self.write(jsonMessage(-1, "[Request error]: 'csr_body' field must be base64 type!"))
+            self.finish()
+        except OpenSSL.crypto.Error:
+            self.write(jsonMessage(-1, "[ERROR]: Wrong certificate request (X509Req) format!"))
+            self.finish()
 
         # 调用生成证书函数
         ret = gencert(365, action['csr_name'], action['csr_body'])
@@ -78,7 +87,7 @@ class CertRevokeHandler(web.RequestHandler):
     def delete(self):
         action = json.loads(self.request.body)
         if 'f' not in action or not checkFingerprint(action['f']):
-            self.write(jsonMessage(-1, "[Request error:] Verification error!"))
+            self.write(jsonMessage(-1, "[Request error]: Verification error!"))
             return
 
         if 'cert' in action.keys():

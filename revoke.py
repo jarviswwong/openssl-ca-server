@@ -17,7 +17,7 @@ def revokeFromCert(cert):
         # get_serial_number返回10进制的serial，需转为16进制
         serial = hex(x509_obj.get_serial_number())[2:]
     except crypto.Error:
-        return jsonMessage(status=-1, msg="[ERROR]:Wrong certificate format!")
+        return jsonMessage(status=-1, msg="[ERROR]: Wrong certificate (X509) format!")
 
     # 存到临时文件夹里
     path = os.path.join(
@@ -35,7 +35,7 @@ def revokeFromCert(cert):
 def revokeFromSerial(serial):
     path = os.path.join(CA_NEWCERTS, serial + ".pem")
     if not os.path.exists(path):
-        msg = "[ERROR]:This may be an invalid serial number!"
+        msg = "[ERROR]: This may be an invalid serial number!"
         return jsonMessage(-1, msg)
 
     return revoking(path, serial)
@@ -46,11 +46,11 @@ def revoking(certfile, serial):
     ret = child.expect(
         ['Already revoked', 'Revoking Certificate', pexpect.EOF])
     if ret == 0:
-        msg = "[ERROR]:This certificate is revoked!"
+        msg = "[ERROR]: This certificate is revoked!"
         return jsonMessage(-1, msg)
     elif ret == 1:
         msg = "Revoke Certificate success! Serial number is " + serial
         return jsonMessage(0, msg, {"Serial Number": serial})
     elif ret == 2:
-        msg = "[ERROR]:Revoke failed, unknown error!"
+        msg = "[ERROR]: Revoke failed, unknown error!"
         return jsonMessage(-1, msg)

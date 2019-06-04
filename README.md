@@ -116,12 +116,14 @@ Connection: close
 ```
 message的具体信息如下表：
 
-| status | message                                                      | Remarks                  |
-| ------ | ------------------------------------------------------------ | ------------------------ |
-| -1     | [Request error]: Missing parameters!                         | 必要参数缺失             |
-|        | [Request error]: Verification error!                         | fingerprint校验失败      |
-|        | [ERROR]:Something is error with signing processing!          | 签发证书超时 \| 签发失败 |
-|        | [ERROR]:Please do not repeat the application for certificate! | 重复签发                 |
+| status | message                                                      | Remarks                     |
+| ------ | ------------------------------------------------------------ | --------------------------- |
+| -1     | [Request error]: Missing parameters!                         | 必要参数缺失                |
+|        | [Request error]: Verification error!                         | fingerprint校验失败         |
+|        | [Request error]: 'csr_body' field must be base64 type!       | csr_body不是base64格式      |
+|        | [ERROR]: Something is error with signing processing!         | 签发证书超时 \| 签发失败    |
+|        | [ERROR]: Please do not repeat the application for certificate! | 重复签发                    |
+|        | [ERROR]: Wrong certificate request (X509Req) format!         | csr文件格式不正确，无法加载 |
 
 **签发成功**将返回：
 
@@ -163,14 +165,14 @@ message的具体信息如下表：
 
 其中error message具体信息如下表：
 
-| status | message                                       | Remarks             |
-| ------ | --------------------------------------------- | ------------------- |
-| -1     | [Request error]: Missing parameters!          | 必要参数缺失        |
-|        | [Request error:] Verification error!          | fingerprint校验失败 |
-|        | [ERROR]:Wrong certificate format!             | 证书格式不正确      |
-|        | [ERROR]:This may be an invalid serial number! | 证书序列号无效      |
-|        | [ERROR]:This certificate is revoked!          | 该证书已经被吊销    |
-|        | [ERROR]:Revoke failed, unknown error!         | 吊销失败，未知错误  |
+| status | message                                        | Remarks             |
+| ------ | ---------------------------------------------- | ------------------- |
+| -1     | [Request error]: Missing parameters!           | 必要参数缺失        |
+|        | [Request error]: Verification error!           | fingerprint校验失败 |
+|        | [ERROR]: Wrong certificate format!             | 证书格式不正确      |
+|        | [ERROR]: This may be an invalid serial number! | 证书序列号无效      |
+|        | [ERROR]: This certificate is revoked!          | 该证书已经被吊销    |
+|        | [ERROR]: Revoke failed, unknown error!         | 吊销失败，未知错误  |
 
 **吊销成功**则返回：
 

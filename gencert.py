@@ -31,14 +31,14 @@ def gencert(days,
     ret = child.expect([pexpect.TIMEOUT, pexpect.EOF, 'Sign the certificate'])
     if ret == 0 or ret == 1:
         return jsonMessage(
-            -1, '[ERROR]:Something is error with signing processing!')
+            -1, '[ERROR]: Something is error with signing processing!')
     if ret == 2:
         child.sendline('y')
         ret = child.expect([pexpect.EOF, 'certificate requests certified'])
         if ret == 0:
             return jsonMessage(
                 -1,
-                '[ERROR]:Please do not repeat the application for certificate!'
+                '[ERROR]: Please do not repeat the application for certificate!'
             )
         if ret == 1:
             child.sendline('y')
@@ -51,4 +51,4 @@ def gencert(days,
                 with open(cert_file, "r") as f:
                     return jsonMessage(0, msg, {'cert': f.read()})
             else:
-                return jsonMessage(-1, '[ERROR]:Signed failure!')
+                return jsonMessage(-1, '[ERROR]: Signed failure!')
