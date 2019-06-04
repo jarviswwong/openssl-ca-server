@@ -50,19 +50,13 @@ class GencertHandler(web.RequestHandler):
         action = json.loads(self.request.body)
         # check arguments existing
         if 'csr_body' not in action.keys() or 'f' not in action.keys():
-            self.write({
-                "status": -1,
-                "msg": "[Request error]: Missing parameters!"
-            })
+            self.write(jsonMessage(-1, "[Request error]: Missing parameters!"))
             return
 
         # 从数据库中检查fingerprint
         result = checkFingerprint(action['f'])
         if not result:
-            self.write({
-                "status": -1,
-                "msg": "[Request error:] Verification error!"
-            })
+            self.write(jsonMessage(-1, "[Request error:] Verification error!"))
             return
 
         action['csr_body'] = base64.b64decode(action['csr_body'])
@@ -75,7 +69,7 @@ class GencertHandler(web.RequestHandler):
 
         # 调用生成证书函数
         ret = gencert(365, action['csr_name'], action['csr_body'])
-        self.write(json.dumps(ret))
+        self.write(ret)
         self.finish()
 
 
@@ -84,10 +78,7 @@ class CertRevokeHandler(web.RequestHandler):
     def delete(self):
         action = json.loads(self.request.body)
         if 'f' not in action or not checkFingerprint(action['f']):
-            self.write({
-                "status": -1,
-                "msg": "[Request error:] Verification error!"
-            })
+            self.write(jsonMessage(-1, "[Request error:] Verification error!"))
             return
 
         if 'cert' in action.keys():

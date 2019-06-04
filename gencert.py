@@ -1,6 +1,6 @@
 import os
 import sys, pexpect
-from common import openssl
+from common import openssl, jsonMessage
 from config import *
 from OpenSSL import crypto
 
@@ -30,25 +30,25 @@ def gencert(days,
     # 自动签名
     ret = child.expect([pexpect.TIMEOUT, pexpect.EOF, 'Sign the certificate'])
     if ret == 0 or ret == 1:
-        msg = '[ERROR]:Something is error with signing processing!'
-        print(msg)
-        return {'status': -1, 'msg': msg}
+        return jsonMessage(
+            -1, '[ERROR]:Something is error with signing processing!')
     if ret == 2:
         child.sendline('y')
         ret = child.expect([pexpect.EOF, 'certificate requests certified'])
         if ret == 0:
-            msg = '[ERROR]:Please do not repeat the application for certificate!'
-            print(msg)
-            return {'status': -1, 'msg': msg}
+            return jsonMessage(
+                -1,
+                '[ERROR]:Please do not repeat the application for certificate!'
+            )
         if ret == 1:
             child.sendline('y')
             sign_result = child.expect(pexpect.EOF)
             if sign_result == 0:
-                print('Your certificate is signed successfully!')
+                msg = 'Your certificate is signed successfully!'
                 # 转换证书成PEM格式
                 openssl('x509', '-in', cert_file, '-out', cert_file,
                         '-outform PEM')
                 with open(cert_file, "r") as f:
-                    return {'status': 0, 'cert': f.read()}
+                    return jsonMessage(0, msg, {'cert': f.read()})
             else:
-                print('[ERROR]:Signed failure!')
+                return jsonMessage(-1, '[ERROR]:Signed failure!')
