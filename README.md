@@ -2,12 +2,10 @@
 
 用于私有网络中自建CA中心并进行证书的签发和认证
 
-
-
-    * [获取CA根证书](#获取ca根证书)
-       * [URL](#url)
-       * [Response 200:](#response-200)
-       * [Response 404:](#response-404)
+* [获取CA根证书](#获取ca根证书)
+   * [URL](#url)
+   * [Response 200:](#response-200)
+   * [Response 404:](#response-404)
 * [获取CA的CRL](#获取ca的crl)
    * [URL](#url-1)
    * [Response 200:](#response-200-1)
