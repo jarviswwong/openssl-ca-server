@@ -6,7 +6,13 @@ from OpenSSL import crypto
 
 # 生成吊销证书列表
 def gencrl():
-    pass
+    crlpath = os.path.join(CA_ROOT, CRL_FILE)
+    child = openssl('ca', '-gencrl', '-out', crlpath)
+    ret = child.expect('Using configuration from')
+    if ret == 0:
+        print("Certificate Revocation List (CRL) updated!")
+    else:
+        print("Failed to update Certificate Revocation List (CRL)")
 
 
 # 通过证书文件吊销证书
@@ -17,7 +23,8 @@ def revokeFromCert(cert):
         # get_serial_number返回10进制的serial，需转为16进制
         serial = hex(x509_obj.get_serial_number())[2:]
     except crypto.Error:
-        return jsonMessage(status=-1, msg="[ERROR]: Wrong certificate (X509) format!")
+        return jsonMessage(
+            status=-1, msg="[ERROR]: Wrong certificate (X509) format!")
 
     # 存到临时文件夹里
     path = os.path.join(
@@ -50,6 +57,8 @@ def revoking(certfile, serial):
         return jsonMessage(-1, msg)
     elif ret == 1:
         msg = "Revoke Certificate success! Serial number is " + serial
+        # 重新生成一遍证书文件
+        gencrl()
         return jsonMessage(0, msg, {"Serial Number": serial})
     elif ret == 2:
         msg = "[ERROR]: Revoke failed, unknown error!"
