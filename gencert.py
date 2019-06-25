@@ -1,5 +1,6 @@
 import os
-import sys, pexpect
+import sys
+import pexpect
 from common import openssl, jsonMessage
 from config import *
 from OpenSSL import crypto

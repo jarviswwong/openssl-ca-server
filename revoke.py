@@ -1,18 +1,10 @@
-import os, datetime, hashlib, pexpect
+import os
+import datetime
+import hashlib
+import pexpect
 from config import *
-from common import openssl, jsonMessage
+from common import openssl, jsonMessage, gencrl
 from OpenSSL import crypto
-
-
-# 生成吊销证书列表
-def gencrl():
-    crlpath = os.path.join(CA_ROOT, CRL_FILE)
-    child = openssl('ca', '-gencrl', '-out', crlpath)
-    ret = child.expect('Using configuration from')
-    if ret == 0:
-        print("Certificate Revocation List (CRL) updated!")
-    else:
-        print("Failed to update Certificate Revocation List (CRL)")
 
 
 # 通过证书文件吊销证书
@@ -23,8 +15,8 @@ def revokeFromCert(cert):
         # get_serial_number返回10进制的serial，需转为16进制
         serial = hex(x509_obj.get_serial_number())[2:]
     except crypto.Error:
-        return jsonMessage(
-            status=-1, msg="[ERROR]: Wrong certificate (X509) format!")
+        return jsonMessage(status=-1,
+                           msg="[ERROR]: Wrong certificate (X509) format!")
 
     # 存到临时文件夹里
     path = os.path.join(
@@ -32,7 +24,7 @@ def revokeFromCert(cert):
         hashlib.md5(str(datetime.datetime.now()).encode('utf-8')).hexdigest() +
         "_revokecert.crt")
     with open(path, "w") as f:
-        f.write(cert)
+        f.write(cert.decode('utf8'))
 
     return revoking(path, serial)
 

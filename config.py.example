@@ -15,4 +15,5 @@ CONN_PARAMS = {
     "passwd": "root",
     "db": "database",
 }
-VERIFY_TABLE = "table_name"
+
+VALIDATE_SECRET = "your validate secret"
