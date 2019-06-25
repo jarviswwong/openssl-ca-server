@@ -64,3 +64,10 @@ def jsonMessage(status, msg, extra={}):
     print(msg)
     jsonData.update(extra)
     return json.dumps(jsonData)
+
+
+# 去除value头尾空格
+def paramFormat(action):
+    for key, value in action.items():
+        action[key] = value.strip()
+    return action

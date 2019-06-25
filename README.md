@@ -23,11 +23,14 @@
 
 ### 更新日志
 
-> 2019-06-25	
+> 2019-06-25	`v1.1`
 >
-> 2019-06-04	v1.0
+> * 使用`aes-256-cfb`代替`fingerprint`的验证方式
+> * 杀死了部分臭虫
 >
-> 初始版本，完成各个接口
+> 2019-06-04	`v1.0`
+>
+> * 初始版本，完成各个接口
 
 | Method | API URL        | Remarks            | Status |
 | ------ | -------------- | ------------------ | ------ |
@@ -92,7 +95,7 @@ Connection: close
 
 #### Response 404:
 
-未生成CRL文件(**后面会加入自动生成**)
+`v1.1`以后不会返回404，如果CRL找不到会自动生成
 
 
 
@@ -104,8 +107,7 @@ Connection: close
 
 #### Parameters
 
-* csr_body: **base64**编码后的request data
-* f: fingerprint，用于校验是否为私有网络中的节点
+* csr_body: 用`aes-256-cfb`加密后的`base64`格式的`X509Req`
 * csr_name（可选）: request文件名，不提供则默认将CommonName作为文件名
 
 #### Response 200:
@@ -125,7 +127,6 @@ message的具体信息如下表：
 | status | message                                                      | Remarks                     |
 | ------ | ------------------------------------------------------------ | --------------------------- |
 | -1     | [Request error]: Missing parameters!                         | 必要参数缺失                |
-|        | [Request error]: Verification error!                         | fingerprint校验失败         |
 |        | [Request error]: 'csr_body' field must be base64 type!       | csr_body不是base64格式      |
 |        | [ERROR]: Something is error with signing processing!         | 签发证书超时 \| 签发失败    |
 |        | [ERROR]: Please do not repeat the application for certificate! | 重复签发                    |
@@ -154,7 +155,8 @@ message的具体信息如下表：
 
 * serial: 需要吊销的证书序列号(与cert二选一)，需为**16进制**格式
 * cert: 需要吊销的证书(与serial二选一)
-* f: fingerprint，同上，用于校验
+
+> **注意**：serial和cert都必须为用`aes-256-cfb`加密后的`base64`格式
 
 #### Response 200:
 
@@ -171,14 +173,13 @@ message的具体信息如下表：
 
 其中error message具体信息如下表：
 
-| status | message                                        | Remarks             |
-| ------ | ---------------------------------------------- | ------------------- |
-| -1     | [Request error]: Missing parameters!           | 必要参数缺失        |
-|        | [Request error]: Verification error!           | fingerprint校验失败 |
-|        | [ERROR]: Wrong certificate format!             | 证书格式不正确      |
-|        | [ERROR]: This may be an invalid serial number! | 证书序列号无效      |
-|        | [ERROR]: This certificate is revoked!          | 该证书已经被吊销    |
-|        | [ERROR]: Revoke failed, unknown error!         | 吊销失败，未知错误  |
+| status | message                                        | Remarks            |
+| ------ | ---------------------------------------------- | ------------------ |
+| -1     | [Request error]: Missing parameters!           | 必要参数缺失       |
+|        | [ERROR]: Wrong certificate format!             | 证书格式不正确     |
+|        | [ERROR]: This may be an invalid serial number! | 证书序列号无效     |
+|        | [ERROR]: This certificate is revoked!          | 该证书已经被吊销   |
+|        | [ERROR]: Revoke failed, unknown error!         | 吊销失败，未知错误 |
 
 **吊销成功**则返回：
 

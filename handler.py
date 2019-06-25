@@ -8,7 +8,7 @@ from tornado_mysql import pools
 from config import *
 from gencert import gencert
 from revoke import revokeFromCert, revokeFromSerial
-from common import jsonMessage, gencrl, AESCipher
+from common import jsonMessage, gencrl, AESCipher, paramFormat
 
 # 使用aes-256-cfb算法解密csr_body，如果是解密失败（非法请求）则后续验证肯定出错
 aesCipher = AESCipher(VALIDATE_SECRET)
@@ -54,7 +54,7 @@ class GencertHandler(web.RequestHandler):
     # gen.coroutine表示异步模式
     @gen.coroutine
     def post(self):
-        action = json.loads(self.request.body)
+        action = paramFormat(json.loads(self.request.body))
         # check arguments existing
         if 'csr_body' not in action.keys():
             self.write(jsonMessage(-1, "[Request error]: Missing parameters!"))
@@ -94,7 +94,7 @@ class GencertHandler(web.RequestHandler):
 class CertRevokeHandler(web.RequestHandler):
     @gen.coroutine
     def delete(self):
-        action = json.loads(self.request.body)
+        action = paramFormat(json.loads(self.request.body))
 
         # 优先验证证书
         if 'cert' in action.keys():
