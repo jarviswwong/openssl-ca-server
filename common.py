@@ -3,6 +3,7 @@ import sys
 import pexpect
 import json
 import base64
+import logging
 from config import *
 from urllib import request
 from Crypto.Cipher import AES
@@ -56,12 +57,22 @@ def gencrl():
         print("Failed to update Certificate Revocation List (CRL)")
 
 
+# 打印请求者信息到日志
+def logRequestInfo(request):
+    logging.info("Remote IP: %s, Method: %s, Protocol: %s" %
+                 (request.remote_ip, request.method, request.protocol))
+
+
 # 返回json格式信息
 # @status = -1 or 0
 def jsonMessage(status, msg, extra={}):
     jsonData = {"status": status, "msg": msg}
     # 打印日志
     print(msg)
+    if status < 0:
+        logging.error(msg)
+    else:
+        logging.info(msg)
     jsonData.update(extra)
     return json.dumps(jsonData)
 
@@ -71,3 +82,9 @@ def paramFormat(action):
     for key, value in action.items():
         action[key] = value.strip()
     return action
+
+
+if __name__ == "__main__":
+    p = "01"
+    aes = AESCipher('damocles_secret_')
+    print(aes.encrypt(p))

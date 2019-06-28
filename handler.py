@@ -1,6 +1,7 @@
 import json
 import os
 import base64
+import logging
 import OpenSSL.crypto
 from tornado import web, gen
 from OpenSSL.crypto import load_certificate_request, FILETYPE_PEM
@@ -8,14 +9,17 @@ from tornado_mysql import pools
 from config import *
 from gencert import gencert
 from revoke import revokeFromCert, revokeFromSerial
-from common import jsonMessage, gencrl, AESCipher, paramFormat
+from common import jsonMessage, gencrl, AESCipher, paramFormat, logRequestInfo
 
 # 使用aes-256-cfb算法解密csr_body，如果是解密失败（非法请求）则后续验证肯定出错
 aesCipher = AESCipher(VALIDATE_SECRET)
 
 
 class GetCACertHandler(web.RequestHandler):
+    @gen.coroutine
     def get(self):
+        # 打印请求者日志
+        logRequestInfo(self.request)
         cacert_path = os.path.join(CA_ROOT, CA_CERT_FILE)
         # 校验根证书是否存在
         if not os.path.exists(cacert_path):
@@ -33,7 +37,9 @@ class GetCACertHandler(web.RequestHandler):
 
 
 class GetCACrlHandler(web.RequestHandler):
+    @gen.coroutine
     def get(self):
+        logRequestInfo(self.request)
         crl_path = os.path.join(CA_ROOT, CRL_FILE)
         if not os.path.exists(crl_path):
             gencrl()
@@ -54,6 +60,7 @@ class GencertHandler(web.RequestHandler):
     # gen.coroutine表示异步模式
     @gen.coroutine
     def post(self):
+        logRequestInfo(self.request)
         action = paramFormat(json.loads(self.request.body))
         # check arguments existing
         if 'csr_body' not in action.keys():
@@ -94,6 +101,7 @@ class GencertHandler(web.RequestHandler):
 class CertRevokeHandler(web.RequestHandler):
     @gen.coroutine
     def delete(self):
+        logRequestInfo(self.request)
         action = paramFormat(json.loads(self.request.body))
 
         # 优先验证证书

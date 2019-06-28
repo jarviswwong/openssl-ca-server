@@ -45,7 +45,8 @@ def gencert(days,
             child.sendline('y')
             sign_result = child.expect(pexpect.EOF)
             if sign_result == 0:
-                msg = 'Your certificate is signed successfully!'
+                msg = 'This Certificate is signed successfully, commonName is %s' % (
+                    node_name)
                 # 转换证书成PEM格式
                 openssl('x509', '-in', cert_file, '-out', cert_file,
                         '-outform PEM')
