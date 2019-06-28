@@ -69,14 +69,12 @@ class GencertHandler(web.RequestHandler):
 
         try:
             action['csr_body'] = aesCipher.decrypt(action['csr_body'])
-            # 如果没有传入csr_name参数，
-            # 则将req中的CommonName作为文件名
-            if 'csr_name' not in action.keys():
-                req = load_certificate_request(FILETYPE_PEM,
-                                               action['csr_body'])
-                subject = req.get_subject()
-                components = dict(subject.get_components())
-                action['csr_name'] = components[b'CN'].decode('utf8')
+            # 将req中的CommonName作为标识该Req的字段
+            req = load_certificate_request(FILETYPE_PEM,
+                                            action['csr_body'])
+            subject = req.get_subject()
+            components = dict(subject.get_components())
+            action['csr_name'] = components[b'CN'].decode('utf8')
         except base64.binascii.Error:
             self.write(
                 jsonMessage(
