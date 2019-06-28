@@ -23,6 +23,13 @@
 
 ### 更新日志
 
+> 2019-06-28	`v.1.2`
+>
+> * 增加日志（默认项目根目录下的`ca_server.log`）
+> * 删除签发证书api下的`csr_name`字段
+> * 修改handler类下的请求处理函数为异步
+> * 杀臭虫
+>
 > 2019-06-25	`v1.1`
 >
 > * 使用`aes-256-cfb`代替`fingerprint`的验证方式
@@ -108,7 +115,6 @@ Connection: close
 #### Parameters
 
 * csr_body: 用`aes-256-cfb`加密后的`base64`格式的`X509Req`
-* csr_name（可选）: request文件名，不提供则默认将CommonName作为文件名
 
 #### Response 200:
 
